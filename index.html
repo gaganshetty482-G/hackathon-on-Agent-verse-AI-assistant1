@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agentverse — AI Task Planner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary: #7a5af8;
+      --accent: #55c2ff;
+      --text-light: #f5f7ff;
+      --glass-bg: rgba(255, 255, 255, 0.12);
+      --border-light: rgba(255, 255, 255, 0.18);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", sans-serif;
+      color: var(--text-light);
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+      animation: fadeInPage 1.2s ease both;
+    }
+
+    /* Background with subtle moving gradient and image */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(122,90,248,0.3) 0%, rgba(85,194,255,0.2) 100%),
+        url("hackimage.webp") no-repeat center center/cover;
+      z-index: -2;
+      background-attachment: fixed;
+      filter: brightness(0.8) saturate(1.1);
+      transform-origin: center;
+      animation: bgMove 20s ease-in-out infinite alternate, fadeInBg 2s ease both;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 20%, #c5a7ff 0%, #a68cff 30%, #89baff 70%, #6ddfff 100%);
+      opacity: 0.3;
+      z-index: -1;
+      animation: gradientShift 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes bgMove {
+      0% { transform: scale(1) translate(0, 0); filter: brightness(0.75) saturate(1.1); }
+      50% { transform: scale(1.08) translateY(-15px); filter: brightness(0.9) saturate(1.2); }
+      100% { transform: scale(1) translate(0, 0); filter: brightness(0.8) saturate(1.1); }
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeInBg {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes fadeInPage {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Centered Navbar with glass effect */
+    .navbar {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-light);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      animation: slideDown 1.2s ease both;
+      justify-content: center !important;
+    }
+
+    .navbar-brand {
+      font-weight: 900;
+      color: #fff !important;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.3);
+      font-size: 1.8rem;
+      text-align: center;
+      width: 100%;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      text-align: center;
+      padding: 130px 20px 100px;
+      position: relative;
+      animation: fadeUp 1.3s ease both;
+    }
+    .hero-section h1 {
+      font-weight: 900;
+      font-size: 3rem;
+      text-shadow: 0 0 30px rgba(255,255,255,0.25);
+      animation: floatY 5s ease-in-out infinite alternate;
+    }
+    .hero-section p {
+      color: #f0f4ff;
+      font-size: 1.2rem;
+      margin: 15px auto 35px;
+      max-width: 700px;
+    }
+    .cta-btn {
+      padding: 14px 36px;
+      font-weight: 700;
+      border-radius: 40px;
+      border: none;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      transition: 0.3s;
+      animation: fadeUp 1.5s ease both;
+      cursor: pointer;
+      user-select: none;
+    }
+    .cta-btn::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      top: var(--y);
+      left: var(--x);
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 70%);
+      border-radius: 50%;
+      opacity: 0.6;
+      transition: width 0.4s, height 0.4s, opacity 0.6s;
+    }
+    .cta-btn:hover::after {
+      width: 250px;
+      height: 250px;
+      opacity: 0;
+    }
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255,255,255,0.25);
+    }
+
+    /* Glass Card Style */
+    .glass {
+      background: var(--glass-bg);
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(25px);
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      color: #f4f6ff;
+      animation: fadeUp 1.2s ease both;
+    }
+    .glass:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 40px rgba(255, 255, 255, 0.15);
+    }
+
+    /* Buttons with interactive ripple effect */
+    .btn-animated {
+      position: relative;
+      padding: 14px 32px;
+      border-radius: 40px;
+      border: none;
+      background: linear-gradient(135deg, #8b6bff, #57d1ff);
+      color: #fff;
+      font-weight: 700;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn-animated::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      top: var(--y);
+      left: var(--x);
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 70%);
+      border-radius: 50%;
+      transition: width 0.4s, height 0.4s;
+    }
+    .btn-animated:hover::after {
+      width: 250px;
+      height: 250px;
+    }
+    .btn-animated:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 25px rgba(255,255,255,0.2);
+    }
+
+    /* Plan and Memory lists */
+    .plan-list li,
+    .mem-item {
+      background: rgba(48, 54, 68, 0.98);
+      border-radius: 13px;
+      margin-bottom: 9px;
+      padding: 11px 17px;
+      border-left: 4px solid #24e3a7;
+      font-size: 1.09rem;
+      color: #e2faf2;
+      box-shadow: 0 2px 9px #24e3a722;
+      transition: transform 0.16s, box-shadow 0.16s, background 0.3s;
+    }
+    .plan-list li:hover,
+    .mem-item:hover {
+      transform: scale(1.02);
+      box-shadow: 0 8px 21px #24e3a742;
+      background: rgba(66, 74, 98, 0.99);
+    }
+
+    .card-header {
+      border-radius: 18px 18px 0 0 !important;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(90deg, #24e3a7 0%, #239cff 100%);
+      box-shadow: 0 2px 8px #24e3a714;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      letter-spacing: 0.2px;
+    }
+
+    /* Logs */
+    .chat-log {
+      background: rgba(17, 22, 38, 0.61);
+      border: 1px solid #24e3a720;
+      border-radius: 10px;
+      color: #cdeaf8;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 15px;
+      height: 170px;
+      overflow-y: auto;
+      padding: 13px;
+      box-shadow: inset 0 0 30px #24e3a720;
+      margin-bottom: 0.9rem;
+      animation: fadeDown 0.9s 0.22s both;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; background: #222b3e; }
+    ::-webkit-scrollbar-thumb { background: #24e3a720; border-radius: 4px; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      body { padding-top: 47px; }
+      .hero-section h1 { font-size: 1.5rem; }
+      .glass { border-radius: 13px; }
+      .btn-animated, .cta-btn {
+        font-size: 15px;
+        padding: 10px 14px;
+      }
+    }
+
+    /* Animations */
+    @keyframes fadeUp { from {opacity: 0; transform: translateY(40px);} to {opacity: 1; transform: translateY(0);} }
+    @keyframes floatY { 0% { transform: translateY(0); } 100% { transform: translateY(-10px); } }
+    @keyframes slideDown { from {transform: translateY(-100%); opacity: 0;} to {transform: translateY(0); opacity: 1;} }
+  </style>
+</head>
+
+<body>
+  <!-- Centered Navbar -->
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container d-flex justify-content-center">
+      <a class="navbar-brand text-center" href="#">🤖Agentverse-AI Assistant</a>
+    </div>
+  </nav>
+
+  <section class="hero-section">
+    <h1>AI Task Planner</h1>
+    <p>Automate your daily workflow with a futuristic, intelligent assistant.</p>
+    <button class="cta-btn" id="cta">Get Started</button>
+  </section>
+
+  <div class="container glass p-4 mb-4" id="mainForm" style="max-width:700px;">
+    <label class="form-label fw-bold mb-2">Describe your task</label>
+    <input type="text" id="taskInput" class="form-control mb-4" placeholder='e.g. "Plan a 1-day trip to Bangalore under ₹2000"' required />
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+      <button id="planBtn" class="btn-animated">🧩 Generate Plan</button>
+      <button id="executeBtn" class="btn-animated">⚙ Execute</button>
+      <button id="memoryBtn" class="btn-animated">🧠 View Memory</button>
+      <button id="clearLog" class="btn-animated">🧹 Clear Logs</button>
+    </div>
+  </div>
+
+  <div class="container glass p-3 mb-4">
+    <h5 class="text-light mb-3">📋 Plan Overview</h5>
+    <ol id="planList" class="plan-list"></ol>
+  </div>
+
+  <div class="container glass p-3 mb-4">
+    <h5 class="text-light mb-3">✅ Execution Results</h5>
+    <table class="table table-hover text-center">
+      <thead><tr><th>#</th><th>Description</th><th>Status</th></tr></thead>
+      <tbody id="resultTable"><tr><td colspan="3" class="text-muted">No execution yet.</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="container glass p-3 mb-4">
+    <h5 class="text-light mb-3">🧠 Agent Memory</h5>
+    <div id="memoryArea">No memory loaded yet.</div>
+  </div>
+
+  <div class="container glass p-3 mb-5">
+    <h5 class="text-light mb-3">📜 Logs</h5>
+    <div id="log" class="chat-log">Agent logs will appear here...</div>
+  </div>
+
+  <footer class="text-center mb-3">© 2025 Agentverse. All rights reserved.</footer>
+
+  <script>
+    const el = id => document.getElementById(id);
+    const logEl = el("log");
+
+    // Ripple effect on buttons
+    document.querySelectorAll('.btn-animated, .cta-btn').forEach(btn => {
+      btn.addEventListener('mousemove', e => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        btn.style.setProperty('--x', `${x}px`);
+        btn.style.setProperty('--y', `${y}px`);
+      });
+    });
+
+    // Smooth scroll on hero CTA button
+    document.getElementById('cta').onclick = () => {
+      document.getElementById('mainForm').scrollIntoView({ behavior:'smooth' });
+    };
+  </script>
+</body>
+</html>
